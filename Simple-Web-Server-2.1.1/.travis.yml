@@ -4,7 +4,9 @@ services:
   - docker
 
 script:
-  - sudo docker run -it -v "$PWD:/repository" eidheim/testing sh -c "
+  - sudo docker run -it -v "$PWD:/repository" debian:testing sh -c "
+      apt-get update &&
+      apt-get install --yes cmake make g\+\+ clang perl libssl-dev libboost-thread-dev libboost-regex-dev libboost-date-time-dev libboost-filesystem-dev &&
       cd /repository && mkdir build && cd build &&
       scan-build cmake -DCMAKE_CXX_FLAGS=-Werror .. &&
       scan-build --status-bugs make &&
@@ -13,10 +15,6 @@ script:
       make &&
       rm -r * &&
       CXX=g++ cmake -DCMAKE_CXX_FLAGS=-Werror .. &&
-      make &&
-      CTEST_OUTPUT_ON_FAILURE=1 make test &&
-      rm -r * &&
-      CXX=g++ cmake -DUSE_STANDALONE_ASIO=ON -DCMAKE_CXX_FLAGS=\"-Werror -O3\" .. &&
       make &&
       CTEST_OUTPUT_ON_FAILURE=1 make test
       "
