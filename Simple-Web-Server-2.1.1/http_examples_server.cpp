@@ -184,14 +184,13 @@ int main()
     };
 
     //  서버 시작..
-    thread server_thread([&server]()
-                         {
+   
         //Start server
-        server.start(); });
+        server.start(); 
 
     // Wait for server to start so that the client can connect
-    this_thread::sleep_for(chrono::seconds(1));
-    size_t end_time;
+ 
+   /* size_t end_time;
     size_t start_time;
 
     // Client examples
@@ -206,7 +205,7 @@ int main()
     cout << r2->content.rdbuf() << endl;
     client2.close();
     end_time = clock();// 2번 째 CLOSE에서 시간 측정
-    std::cout << "time : "<<(double)(end_time-start_time) << "miliseconds" <<std::endl;
+    std::cout << "time : "<<(double)(end_time-start_time) << "miliseconds" <<std::endl;*/
 
     /*string json_string = "{\"firstName\": \"John\",\"lastName\": \"Smith\",\"age\": 25}";
     auto r2 = client.request("POST", "/string", json_string);
@@ -214,8 +213,6 @@ int main()
 
     auto r3 = client.request("POST", "/json", json_string);
     cout << r3->content.rdbuf() << endl;*/
-
-    server_thread.join();
 
     return 0;
 }

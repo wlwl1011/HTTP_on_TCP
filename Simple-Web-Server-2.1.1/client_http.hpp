@@ -11,6 +11,7 @@
 #include <random>
 #include <mutex>
 #include <type_traits>
+#include <ctime>
 
 #ifndef CASE_INSENSITIVE_EQUALS_AND_HASH
 #define CASE_INSENSITIVE_EQUALS_AND_HASH
@@ -35,6 +36,7 @@ public:
 namespace SimpleWeb {
     template <class socket_type>
     class Client;
+    
     
     template <class socket_type>
     class ClientBase {
@@ -66,8 +68,11 @@ namespace SimpleWeb {
             size_t timeout=0;
             /// Set connect timeout in seconds. Default value: 0 (Config::timeout is then used instead).
             size_t timeout_connect=0;
+        
             /// Set proxy server (server:port)
             std::string proxy_server;
+
+           
         };
         
         /// Set before calling request
@@ -91,6 +96,7 @@ namespace SimpleWeb {
             if(content.size()>0)
                 write_stream << "Content-Length: " << content.size() << "\r\n";
             write_stream << "\r\n";
+            
             
             connect();
             
@@ -151,6 +157,7 @@ namespace SimpleWeb {
             if(content_length>0)
                 write_stream << content.rdbuf();
             
+           
             connect();
             
             auto timer=get_timeout_timer();
@@ -176,6 +183,11 @@ namespace SimpleWeb {
                 boost::system::error_code ec;
                 socket->lowest_layer().shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
                 socket->lowest_layer().close();
+              
+               // std::cout << "end_time : " << end_time << "초" << std::endl;
+               // std::cout << "start_time : " << start_time << "초" << std::endl;
+               
+               
             }
         }
         
@@ -208,7 +220,7 @@ namespace SimpleWeb {
             }
             return parsed_host_port;
         }
-        
+    
         virtual void connect()=0;
         
         std::shared_ptr<boost::asio::deadline_timer> get_timeout_timer(size_t timeout=0) {
@@ -389,9 +401,12 @@ namespace SimpleWeb {
     class Client<HTTP> : public ClientBase<HTTP> {
     public:
         Client(const std::string& server_port_path) : ClientBase<HTTP>::ClientBase(server_port_path, 80) {}
-        
+        std::size_t start_time;
+  
     protected:
         void connect() {
+                start_time= clock();
+                //std::cout << "start time : "<< start_time << std::endl;
             if(!socket || !socket->is_open()) {
                 std::unique_ptr<boost::asio::ip::tcp::resolver::query> query;
                 if(config.proxy_server.empty())
