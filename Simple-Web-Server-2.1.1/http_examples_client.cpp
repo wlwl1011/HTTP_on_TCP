@@ -33,14 +33,17 @@ int main()
    size_t end_time;
     size_t start_time;
 
+//server ip, port -> 192.168.81.100, 6121
+//client ip1 -> 192.168.113.75
+//client ip2 -> 192.168.34.38
     // Client examples
-    HttpClient client("localhost:8080");
+    HttpClient client("192.168.81.100:6121");
     auto r1 = client.request("GET", "/");
     start_time = client.start_time; //첫 REQUEST에서 시작 재기 시작함
     cout << r1->content.rdbuf() << endl;
     client.close();
     
-    HttpClient client2("localhost:8080");
+    HttpClient client2("192.168.81.100:6121");
     auto r2 = client2.request("GET", "/");
     cout << r2->content.rdbuf() << endl;
     client2.close();
