@@ -213,21 +213,24 @@ namespace SimpleWeb
 
     protected:
         boost::asio::io_service io_service;
+        std::shared_ptr<boost::asio::io_service> io_service2;
         boost::asio::ip::tcp::resolver resolver;
-
+        std::unique_ptr<boost::asio::ip::tcp::acceptor> acceptor;
         std::unique_ptr<socket_type> socket;
         std::mutex socket_mutex;
 
         std::string host;
         unsigned short port;
+        std::string client;
+        
 
         ClientBase(const std::string &host_port, unsigned short host_default_port, const std::string &client_ip) : resolver(io_service)
         {
-            auto parsed_host_port = parse_host_port(host_port, host_ default_port);
+            auto parsed_host_port = parse_host_port(host_port, host_default_port);
             host = parsed_host_port.first;
             port = parsed_host_port.second;
 
-            client_ip = client_port;
+            client = client_ip;
         }
 
         std::pair<std::string, unsigned short> parse_host_port(const std::string &host_port, unsigned short host_default_port)
@@ -472,7 +475,7 @@ namespace SimpleWeb
                 boost::asio::ip::tcp::endpoint endpoint;
                 endpoint = boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(config.proxy_client), 8080);
                 if (!acceptor)
-                    acceptor = std::unique_ptr<boost::asio::ip::tcp::acceptor>(new boost::asio::ip::tcp::acceptor(*io_service));
+                    acceptor = std::unique_ptr<boost::asio::ip::tcp::acceptor>(new boost::asio::ip::tcp::acceptor(*io_service2));
                 acceptor->open(endpoint.protocol());
                 acceptor->set_option(boost::asio::socket_base::reuse_address(config.reuse_address));
                 acceptor->bind(endpoint);
