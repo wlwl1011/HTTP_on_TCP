@@ -81,7 +81,7 @@ namespace SimpleWeb
 
             /// Set proxy server (server:port)
             std::string proxy_server;
-            std::string proxy_client;
+            
             bool reuse_address = true;
         };
 
@@ -467,24 +467,43 @@ namespace SimpleWeb
         void connect()
         {
             start_time = clock();
-            // std::cout << "start time : "<< start_time << std::endl;
+            
+             std::cout << "start time : "<< start_time << std::endl;
             if (!socket || !socket->is_open())
             {
 
                 std::unique_ptr<boost::asio::ip::tcp::resolver::query> query;
                 boost::asio::ip::tcp::endpoint endpoint;
-                endpoint = boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(config.proxy_client), 8080);
+                std::cout << client << std::endl;
+
+                 if(!io_service2)
+                 {
+                    io_service2=std::make_shared<boost::asio::io_service>();
+                 }
+
+                if(io_service2->stopped())
+                {
+                    io_service2->reset();
+                }
+                std::cout << "ioservice reset" << std::endl;
+                endpoint = boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(client), 8089);
+                std::cout << "1" << std::endl;
                 if (!acceptor)
+                {
                     acceptor = std::unique_ptr<boost::asio::ip::tcp::acceptor>(new boost::asio::ip::tcp::acceptor(*io_service2));
+                }
+                std::cout << ".." << std::endl;
                 acceptor->open(endpoint.protocol());
                 acceptor->set_option(boost::asio::socket_base::reuse_address(config.reuse_address));
                 acceptor->bind(endpoint);
+              
                 // boost::asio::
                 // std::string clientIp = config.proxy_client;
                 if (config.proxy_server.empty())
                     query = std::unique_ptr<boost::asio::ip::tcp::resolver::query>(new boost::asio::ip::tcp::resolver::query(host, std::to_string(port)));
                 else
                 {
+                std::cout << "5" << std::endl;
                     auto proxy_host_port = parse_host_port(config.proxy_server, 8080); // host ip 와 port 를 나눈다.
                     query = std::unique_ptr<boost::asio::ip::tcp::resolver::query>(new boost::asio::ip::tcp::resolver::query(proxy_host_port.first, std::to_string(proxy_host_port.second)));
                 }

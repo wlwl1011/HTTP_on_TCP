@@ -33,7 +33,7 @@ int main()
     // Unless you do more heavy non-threaded processing in the resources,
     // 1 thread is usually faster than several threads
     HttpServer server;
-    server.config.port = 6121;
+    server.config.port = 8080;
     // server.address = "127.0.0.1";
 
     // Add resources using path-regex and method-string, and an anonymous function
