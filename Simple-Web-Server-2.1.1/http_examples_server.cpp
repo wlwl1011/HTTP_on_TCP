@@ -33,7 +33,8 @@ int main()
     // Unless you do more heavy non-threaded processing in the resources,
     // 1 thread is usually faster than several threads
     HttpServer server;
-    server.config.port = 8080;
+    server.config.port = 6121;
+    // server.address = "127.0.0.1";
 
     // Add resources using path-regex and method-string, and an anonymous function
     // POST-example for the path /string, responds the posted string
@@ -184,28 +185,28 @@ int main()
     };
 
     //  서버 시작..
-   
-        //Start server
-        server.start(); 
+
+    // Start server
+    server.start();
 
     // Wait for server to start so that the client can connect
- 
-   /* size_t end_time;
-    size_t start_time;
 
-    // Client examples
-    HttpClient client("localhost:8081");
-    auto r1 = client.request("GET", "/");
-    start_time = client.start_time; //첫 REQUEST에서 시작 재기 시작함
-    cout << r1->content.rdbuf() << endl;
-    client.close();
-    
-    HttpClient client2("localhost:8081");
-    auto r2 = client2.request("GET", "/");
-    cout << r2->content.rdbuf() << endl;
-    client2.close();
-    end_time = clock();// 2번 째 CLOSE에서 시간 측정
-    std::cout << "time : "<<(double)(end_time-start_time) << "miliseconds" <<std::endl;*/
+    /* size_t end_time;
+     size_t start_time;
+
+     // Client examples
+     HttpClient client("localhost:8081");
+     auto r1 = client.request("GET", "/");
+     start_time = client.start_time; //첫 REQUEST에서 시작 재기 시작함
+     cout << r1->content.rdbuf() << endl;
+     client.close();
+
+     HttpClient client2("localhost:8081");
+     auto r2 = client2.request("GET", "/");
+     cout << r2->content.rdbuf() << endl;
+     client2.close();
+     end_time = clock();// 2번 째 CLOSE에서 시간 측정
+     std::cout << "time : "<<(double)(end_time-start_time) << "miliseconds" <<std::endl;*/
 
     /*string json_string = "{\"firstName\": \"John\",\"lastName\": \"Smith\",\"age\": 25}";
     auto r2 = client.request("POST", "/string", json_string);
