@@ -1,2 +1,2 @@
 # HTTP_on_TCP
-Code for experiment about connection migration 
+Code for experiment for comparing with QUIC
