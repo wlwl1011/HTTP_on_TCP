@@ -65,7 +65,6 @@ namespace SimpleWeb {
             friend class ServerBase<socket_type>;
 
             boost::asio::streambuf streambuf;
-
             std::shared_ptr<socket_type> socket;
 
             Response(const std::shared_ptr<socket_type> &socket): std::ostream(&streambuf), socket(socket) {}

@@ -38,14 +38,14 @@ int main()
     // client ip2 -> 192.168.34.38
     //  Client examples
     // HttpClient client("192.168.81.100:6121", "192.168.113.75");
-    HttpClient client("127.0.0.1:8080", "127.0.0.1");
+    HttpClient client("155.230.34.228:6121", "192.168.34.38");
     auto r1 = client.request("GET", "/");
     start_time = client.start_time; //첫 REQUEST에서 시작 재기 시작함
     cout << r1->content.rdbuf() << endl;
     client.close();
 
     // HttpClient client2("192.168.81.100:6121", "192.168.34.38");
-    HttpClient client2("127.0.0.1:8080", "127.0.0.1");
+    HttpClient client2("155.230.34.228:6121", "192.168.128.100");
     auto r2 = client2.request("GET", "/");
     cout << r2->content.rdbuf() << endl;
     client2.close();
