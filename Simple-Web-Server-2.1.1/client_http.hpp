@@ -490,23 +490,32 @@ namespace SimpleWeb
                 std::cout << "1" << std::endl;
                 if (!acceptor)
                 {
+                     std::cout << "2" << std::endl;
                     acceptor = std::unique_ptr<boost::asio::ip::tcp::acceptor>(new boost::asio::ip::tcp::acceptor(*io_service2));
                 }
-                std::cout << ".." << std::endl;
+                std::cout << "3" << std::endl;
                 acceptor->open(endpoint.protocol());
+                std::cout << "4" << std::endl;
                 acceptor->set_option(boost::asio::socket_base::reuse_address(config.reuse_address));
+                std::cout << "5" << std::endl;
                 acceptor->bind(endpoint);
+                std::cout << "6" << std::endl;
+                std::cout << endpoint << std::endl;
               
                 // boost::asio::
                 // std::string clientIp = config.proxy_client;
                 if (config.proxy_server.empty())
+                {
+                    std::cout << "7" << std::endl;
                     query = std::unique_ptr<boost::asio::ip::tcp::resolver::query>(new boost::asio::ip::tcp::resolver::query(host, std::to_string(port)));
+                }
                 else
                 {
-                std::cout << "5" << std::endl;
+                    std::cout << "8" << std::endl;
                     auto proxy_host_port = parse_host_port(config.proxy_server, 8080); // host ip 와 port 를 나눈다.
                     query = std::unique_ptr<boost::asio::ip::tcp::resolver::query>(new boost::asio::ip::tcp::resolver::query(proxy_host_port.first, std::to_string(proxy_host_port.second)));
                 }
+                std::cout << "9" << std::endl;
                 resolver.async_resolve(*query, [this](const boost::system::error_code &ec,
                                                       boost::asio::ip::tcp::resolver::iterator it)
                                        {
@@ -537,8 +546,11 @@ namespace SimpleWeb
                         socket=nullptr;
                         throw boost::system::system_error(ec);
                     } });
+                std::cout << "10" << std::endl;
                 io_service.reset();
+                std::cout << "11" << std::endl;
                 io_service.run();
+                
             }
         }
     };
