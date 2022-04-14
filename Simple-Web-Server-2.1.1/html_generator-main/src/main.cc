@@ -4,7 +4,7 @@
 
 int main() {
 
-    int size = 1000;
+    int size = 400000;
     std::string sizeText = std::to_string(size);
 
     std::ofstream output;
