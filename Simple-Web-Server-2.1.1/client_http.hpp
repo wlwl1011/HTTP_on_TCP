@@ -470,13 +470,15 @@ namespace SimpleWeb
     {
     public:
         Client(const std::string &server_port_path, const std::string &client_port_path) : ClientBase<HTTP>::ClientBase(server_port_path, 80, client_port_path) {}
-        std::size_t start_time;
+        std::size_t total_delay_start_time;
+        std::size_t handover_delay_end_time;
 
     protected:
         void connect()
         {
             auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-            start_time = millisec_since_epoch;
+            total_delay_start_time = millisec_since_epoch;
+            handover_delay_end_time = millisec_since_epoch;
             
              //std::cout << "start time : "<< start_time << std::endl;
             if (!socket || !socket->is_open())
@@ -496,7 +498,8 @@ namespace SimpleWeb
                     io_service2->reset();
                 }
                 //std::cout << "ioservice reset" << std::endl;
-                endpoint = boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(client), 8089);
+                //std::cout << client << std::endl;
+                endpoint = boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(client), 8090);
                 //std::cout << "1" << std::endl;
                 if (!acceptor)
                 {
@@ -510,7 +513,7 @@ namespace SimpleWeb
                 //std::cout << "5" << std::endl;
                 acceptor->bind(endpoint);
                 //std::cout << "6" << std::endl;
-                std::cout << endpoint << std::endl;
+                //std::cout << endpoint << std::endl;
               
                 // boost::asio::
                 // std::string clientIp = config.proxy_client;
