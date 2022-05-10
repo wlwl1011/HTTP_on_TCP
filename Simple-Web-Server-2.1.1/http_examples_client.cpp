@@ -59,7 +59,7 @@ void thread_function(HttpClient* client)
     cout << "Second connection "<< r2->status_code << endl;
     auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
     total_delay_end_time = millisec_since_epoch;// 2번 째 CLOSE에서 시간 측정;
-    cout << "-------------------------"<< r2->status_code << endl;
+    cout << "-------------------------"<< endl;
     std::cout << "handover delay : " << (double)(handover_delay_end_time - handover_delay_start_time) << " miliseconds" << std::endl;
     std::cout << "total delay : " << (double)(total_delay_end_time - total_delay_start_time) << " miliseconds" << std::endl;
 
