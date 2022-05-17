@@ -32,7 +32,7 @@ int main() {
     }
 
     for(int i=0; i<size; i++) {
-        output.write("M", 1);
+        output.write("K", 1);
     }
 
     output.seekp(0, std::ios::end);

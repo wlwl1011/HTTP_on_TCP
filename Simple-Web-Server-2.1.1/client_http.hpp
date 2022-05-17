@@ -479,64 +479,36 @@ namespace SimpleWeb
             auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
             total_delay_start_time = millisec_since_epoch;
             handover_delay_end_time = millisec_since_epoch;
-            
-             //std::cout << "start time : "<< start_time << std::endl;
+
             if (!socket || !socket->is_open())
             {
-
                 std::unique_ptr<boost::asio::ip::tcp::resolver::query> query;
-                boost::asio::ip::tcp::endpoint endpoint;
-                //std::cout << client << std::endl;
-
-                 if(!io_service2)
-                 {
-                    io_service2=std::make_shared<boost::asio::io_service>();
-                 }
-
-                if(io_service2->stopped())
-                {
-                    io_service2->reset();
-                }
-                //std::cout << "ioservice reset" << std::endl;
-                //std::cout << client << std::endl;
-                endpoint = boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(client), 8090);
-                //std::cout << "1" << std::endl;
-                if (!acceptor)
-                {
-                     //std::cout << "2" << std::endl;
-                    acceptor = std::unique_ptr<boost::asio::ip::tcp::acceptor>(new boost::asio::ip::tcp::acceptor(*io_service2));
-                }
-                //std::cout << "3" << std::endl;
-                acceptor->open(endpoint.protocol());
-                //std::cout << "4" << std::endl;
-                acceptor->set_option(boost::asio::socket_base::reuse_address(config.reuse_address));
-                //std::cout << "5" << std::endl;
-                acceptor->bind(endpoint);
-                //std::cout << "6" << std::endl;
-                //std::cout << endpoint << std::endl;
-              
-                // boost::asio::
-                // std::string clientIp = config.proxy_client;
                 if (config.proxy_server.empty())
                 {
-                    //std::cout << "7" << std::endl;
+                    //192.168.50.244
+                    //query = std::unique_ptr<boost::asio::ip::tcp::resolver::query>(new boost::asio::ip::tcp::resolver::query(host, std::to_string(port)));
                     query = std::unique_ptr<boost::asio::ip::tcp::resolver::query>(new boost::asio::ip::tcp::resolver::query(host, std::to_string(port)));
                 }
                 else
                 {
-                    //std::cout << "8" << std::endl;
                     auto proxy_host_port = parse_host_port(config.proxy_server, 8080); // host ip 와 port 를 나눈다.
                     query = std::unique_ptr<boost::asio::ip::tcp::resolver::query>(new boost::asio::ip::tcp::resolver::query(proxy_host_port.first, std::to_string(proxy_host_port.second)));
                 }
-                //std::cout << "9" << std::endl;
+                //지정된 호스트 이름을 IP 주소로 변환
                 resolver.async_resolve(*query, [this](const boost::system::error_code &ec,
                                                       boost::asio::ip::tcp::resolver::iterator it)
                                        {
                     if(!ec) {
-                        {
-                            std::lock_guard<std::mutex> lock(socket_mutex);
-                            socket=std::unique_ptr<HTTP>(new HTTP(io_service));
-                        }
+                        
+                        std::lock_guard<std::mutex> lock(socket_mutex);
+                        socket=std::unique_ptr<HTTP>(new HTTP(io_service));
+                        boost::asio::ip::tcp::endpoint endpoint = boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(client), 8090);
+                        socket->open(endpoint.protocol());
+                        socket->bind(endpoint);
+                        
+                        std::cout << "Bfore connection, client ip is " ;
+                        std::cout <<  socket->local_endpoint() << std::endl;
+                        //std::cout <<  socket->remote_endpoint() << std::endl;
                         
                         auto timer=get_timeout_timer(config.timeout_connect);
                         boost::asio::async_connect(*socket, it, [this, timer]
@@ -544,24 +516,40 @@ namespace SimpleWeb
                             if(timer)
                                 timer->cancel();
                             if(!ec) {
+                               
                                 boost::asio::ip::tcp::no_delay option(true);
                                 this->socket->set_option(option);
+                                //현재 연결 된 ip 보여줌
+                               std::cout << "After connection, client ip is " ;
+                                std::cout <<  this->socket->local_endpoint();
+                                std::cout << ", and server ip is " ;
+                                std::cout <<  this->socket->remote_endpoint() << std::endl;
                             }
                             else {
+                               //std::cout << "3" << std::endl;
                                 std::lock_guard<std::mutex> lock(socket_mutex);
                                 this->socket=nullptr;
                                 throw boost::system::system_error(ec);
                             }
+                            
                         });
+                    
+
+                      
                     }
                     else {
+                        //std::cout << "4" << std::endl;
                         std::lock_guard<std::mutex> lock(socket_mutex);
                         socket=nullptr;
-                        throw boost::system::system_error(ec);
-                    } });
-                //std::cout << "10" << std::endl;
+                      throw boost::system::system_error(ec);
+                    } }
+                    
+                    );
+                
+                //std::cout << "5" << std::endl;
                 io_service.reset();
-                //std::cout << "11" << std::endl;
+             
+                //std::cout << "6" << std::endl;
                 io_service.run();
                 
             }
