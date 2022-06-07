@@ -42,47 +42,99 @@ size_t handover_delay_start_time;
 void default_resource_send(const HttpServer &server, const shared_ptr<HttpServer::Response> &response,
                            const shared_ptr<ifstream> &ifs);
 
+void NetworkChange(std::string fromIface, std::string toIface) {
 
-void thread_function(HttpClient* client)
+            //std::this_thread::sleep_for(std::chrono::milliseconds(100)); 
+            std::string del_order = "sudo route del -net 0.0.0.0 dev ";
+            std::string add_order = "sudo route add -net 0.0.0.0 gw ";
+
+            FILE* fp;
+            char buf[256];
+            static char iface[256];
+            in_addr_t dest, gw, flag, refcnt, use, metric, mask;
+            struct in_addr from_gw, to_gw;
+            unsigned int to_metric;
+            int ret;
+
+            for(int i=0; i<1; i++) {
+
+                fp = fopen("/proc/net/route", "r");
+
+                if(fp == NULL)
+                    return;
+
+                while(fgets(buf, 255, fp)) {
+                    if(!strncmp(buf, "Iface", 5)) continue;
+                    ret = sscanf(buf, "%s\t%x\t%x\t%d\t%d\t%d\t%d\t%x", iface, &dest, &gw, &flag, &refcnt, &use, &metric, &mask);
+                    
+                    if(ret < 8) {
+                        fprintf(stderr, "Line Read Error");
+                        return;
+                    }
+
+                    if(dest == 0) {
+                        if(strcmp(fromIface.c_str(), iface) == 0) {
+                            from_gw.s_addr = gw;
+                        } else if(strcmp(toIface.c_str(), iface) == 0) {
+                            to_gw.s_addr = gw;
+                            to_metric = metric;
+                        }
+                    }
+        }
+
+            fclose(fp);
+
+        // change network info
+
+            system(std::string(del_order + fromIface).c_str());    
+            std::cout << "[quic_toy_client] Network Change from " << fromIface << " to " << toIface << std::endl;
+            //cout << std::string(add_order + inet_ntoa(to_gw) + " dev " + toIface + " metric 101").c_str() << endl;
+            system(std::string(add_order + inet_ntoa(to_gw) + " dev " + toIface + " metric 101").c_str());
+            //cout << std::string(del_order + toIface + " metric " + std::to_string(to_metric)).c_str() << endl;
+            system(std::string(del_order + toIface + " metric " + std::to_string(to_metric)).c_str());
+            //cout << std::string(add_order + inet_ntoa(from_gw) + " dev " + fromIface + " metric 600").c_str() << endl;
+            system(std::string(add_order + inet_ntoa(from_gw) + " dev " + fromIface + " metric 600").c_str());
+
+    
+
+    }
+
+    }
+
+void thread_function()
 {
-    this_thread::sleep_for(chrono::milliseconds(50));
-    cout << "-----Start Migration-----" << endl;
-    client->close();
-    auto millisec_since_epoch_hanover = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count(); 
-    handover_delay_start_time = millisec_since_epoch_hanover;
-    // HttpClient client2("192.168.81.100:6121", "192.168.34.38");
-    HttpClient client2("155.230.34.228:8080", "192.168.50.244");
+   
+    this_thread::sleep_for(chrono::milliseconds(100));
+    auto millisec_since_epoch_hanover_start = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count(); 
+    handover_delay_start_time = millisec_since_epoch_hanover_start;
+   
+    NetworkChange("eth0","wlo1");
+    HttpClient client2("155.230.34.228:8080", "wlo1");
+
+    
+    
     auto r2 = client2.request("GET", "/");
     handover_delay_end_time = client2.handover_delay_end_time;
-    //cout << r2->content.rdbuf() << endl;
-    client2.close();
-    
-    cout << "connection status is "<< r2->status_code << endl;
     auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-    total_delay_end_time = millisec_since_epoch;// 2번 째 CLOSE에서 시간 측정;
-    cout << "************************"<< endl;
+    total_delay_end_time = millisec_since_epoch;// 2번 째 CLOSE에서 시간 측정
+   
+    client2.close();
+   
     std::cout << "handover delay : " << (double)(handover_delay_end_time - handover_delay_start_time) << " miliseconds" << std::endl;
-    
     std::cout << "total delay : " << (double)(total_delay_end_time - total_delay_start_time) << " miliseconds" << std::endl;
 
 }
 
 int main()
 {
-    // server ip, port -> 192.168.81.100, 6121
-    // client ip1 -> 192.168.113.75
-    // client ip2 -> 192.168.34.38
-    //  Client examples
-    // HttpClient client("192.168.81.100:6121", "192.168.113.75");
-    //192.168.128.100
-    cout << "------First Connection-----"<< endl;
-    HttpClient client("155.230.34.228:8080", "155.230.35.204");
-    auto r1 = client.request("GET", "/");
+   // cout << "------First Connection-----"<< endl;
+    HttpClient client("155.230.34.228:8080", "eth0");
+   // cout << "request1" << endl;
+   
+    auto r1 = client.request("GET", "/test");
+    thread _t1(thread_function);
     total_delay_start_time = client.total_delay_start_time; //첫 REQUEST에서 시작 재기 시작함
-    
-    thread _t1(thread_function, &client);
-    cout << "connection status is "<< r1->status_code << endl;
+    std::cout << r1->status_code << std::endl;
     _t1.join();
-
     return 0;
 }

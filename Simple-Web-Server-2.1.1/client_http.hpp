@@ -16,6 +16,11 @@
 #include <iostream>
 #include <sys/time.h>
 #include <ctime>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <ifaddrs.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 using std::cout; using std::endl;
 using std::chrono::duration_cast;
@@ -72,7 +77,7 @@ namespace SimpleWeb
         private:
             boost::asio::streambuf content_buffer;
 
-            Response() : content(&content_buffer) {}
+           Response() : content(&content_buffer) {}
         };
 
         class Config
@@ -86,7 +91,7 @@ namespace SimpleWeb
             /// Set timeout on requests in seconds. Default value: 0 (no timeout).
             size_t timeout = 0;
             /// Set connect timeout in seconds. Default value: 0 (Config::timeout is then used instead).
-            size_t timeout_connect = 0;
+         size_t timeout_connect = 0;
 
             /// Set proxy server (server:port)
             std::string proxy_server;
@@ -474,11 +479,10 @@ namespace SimpleWeb
         std::size_t handover_delay_end_time;
 
     protected:
+           
         void connect()
         {
-            auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-            total_delay_start_time = millisec_since_epoch;
-            handover_delay_end_time = millisec_since_epoch;
+            
 
             if (!socket || !socket->is_open())
             {
@@ -494,6 +498,8 @@ namespace SimpleWeb
                     auto proxy_host_port = parse_host_port(config.proxy_server, 8080); // host ip 와 port 를 나눈다.
                     query = std::unique_ptr<boost::asio::ip::tcp::resolver::query>(new boost::asio::ip::tcp::resolver::query(proxy_host_port.first, std::to_string(proxy_host_port.second)));
                 }
+
+                //std::cout << query->host_name() << std::endl;
                 //지정된 호스트 이름을 IP 주소로 변환
                 resolver.async_resolve(*query, [this](const boost::system::error_code &ec,
                                                       boost::asio::ip::tcp::resolver::iterator it)
@@ -502,13 +508,40 @@ namespace SimpleWeb
                         
                         std::lock_guard<std::mutex> lock(socket_mutex);
                         socket=std::unique_ptr<HTTP>(new HTTP(io_service));
-                        boost::asio::ip::tcp::endpoint endpoint = boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(client), 8090);
-                        socket->open(endpoint.protocol());
-                        socket->bind(endpoint);
+                        //boost::asio::ip::tcp::endpoint endpoint = boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(client), 8090);
+                        // socket->open(endpoint.protocol());
+                        //socket->bind(endpoint);
                         
-                        std::cout << "Bfore connection, client ip is " ;
-                        std::cout <<  socket->local_endpoint() << std::endl;
-                        //std::cout <<  socket->remote_endpoint() << std::endl;
+                        // std::cout << "Bfore connection, client ip is " ;
+                        // std::cout <<  socket->local_endpoint() << std::endl;
+                        // std::cout <<  socket->remote_endpoint() << std::endl;
+
+                        //내가 원하는 ip얻기
+                        struct ifaddrs *ifap, *ifa;
+                        struct sockaddr_in *sa;
+                        boost::asio::ip::tcp::endpoint ip;
+ 
+                        getifaddrs(&ifap);
+
+                        for(ifa = ifap; ifa; ifa = ifa->ifa_next) {
+                        
+                        if(ifa->ifa_addr && ifa->ifa_addr->sa_family == AF_INET) {
+                            if(strcmp(ifa->ifa_name, client.c_str() ) == 0) {
+                            sa = (struct sockaddr_in *) ifa->ifa_addr;
+                            std::cout << "Now ip is " << inet_ntoa(sa->sin_addr) << std::endl;
+                            ip = boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(inet_ntoa(sa->sin_addr)), 8090);
+                            socket->open(ip.protocol());
+                            socket->bind(ip);
+                            break;
+
+                        } 
+
+                    }
+
+                    }
+
+                        freeifaddrs(ifap);
+                        
                         
                         auto timer=get_timeout_timer(config.timeout_connect);
                         boost::asio::async_connect(*socket, it, [this, timer]
@@ -519,11 +552,15 @@ namespace SimpleWeb
                                
                                 boost::asio::ip::tcp::no_delay option(true);
                                 this->socket->set_option(option);
+
                                 //현재 연결 된 ip 보여줌
-                               std::cout << "After connection, client ip is " ;
-                                std::cout <<  this->socket->local_endpoint();
-                                std::cout << ", and server ip is " ;
-                                std::cout <<  this->socket->remote_endpoint() << std::endl;
+                                std::cout << "Client ip is " ;
+                                std::cout <<  this->socket->local_endpoint() << std::endl;
+                                // std::cout << ", and server ip is " ;
+                                // std::cout <<  this->socket->remote_endpoint() << std::endl;
+                                auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+                                total_delay_start_time = millisec_since_epoch;
+                                handover_delay_end_time = millisec_since_epoch;
                             }
                             else {
                                //std::cout << "3" << std::endl;
@@ -533,6 +570,8 @@ namespace SimpleWeb
                             }
                             
                         });
+
+                      //  std::cout << "async done" << std::endl;
                     
 
                       

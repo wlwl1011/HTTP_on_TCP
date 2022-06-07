@@ -1,0 +1,8 @@
+Now ip is 172.20.10.6
+Client ip is 172.20.10.6:57412
+400 Bad Request
+[quic_toy_client] Network Change from eth0 to wlo1
+Now ip is 192.168.34.244
+Client ip is 192.168.34.244:41222
+handover delay : 70 miliseconds
+total delay : 88561 miliseconds
