@@ -88,11 +88,11 @@ void NetworkChange(std::string fromIface, std::string toIface) {
 
             system(std::string(del_order + fromIface).c_str());    
             std::cout << "[quic_toy_client] Network Change from " << fromIface << " to " << toIface << std::endl;
-            //cout << std::string(add_order + inet_ntoa(to_gw) + " dev " + toIface + " metric 101").c_str() << endl;
-            system(std::string(add_order + inet_ntoa(to_gw) + " dev " + toIface + " metric 101").c_str());
-            //cout << std::string(del_order + toIface + " metric " + std::to_string(to_metric)).c_str() << endl;
+            cout << std::string(add_order + inet_ntoa(to_gw) + " dev " + toIface + " metric 51").c_str() << endl;
+            system(std::string(add_order + inet_ntoa(to_gw) + " dev " + toIface + " metric 51").c_str());
+            cout << std::string(del_order + toIface + " metric " + std::to_string(to_metric)).c_str() << endl;
             system(std::string(del_order + toIface + " metric " + std::to_string(to_metric)).c_str());
-            //cout << std::string(add_order + inet_ntoa(from_gw) + " dev " + fromIface + " metric 600").c_str() << endl;
+            cout << std::string(add_order + inet_ntoa(from_gw) + " dev " + fromIface + " metric 600").c_str() << endl;
             system(std::string(add_order + inet_ntoa(from_gw) + " dev " + fromIface + " metric 600").c_str());
 
     
@@ -108,11 +108,10 @@ void thread_function()
     auto millisec_since_epoch_hanover_start = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count(); 
     handover_delay_start_time = millisec_since_epoch_hanover_start;
    
-    NetworkChange("eth0","wlo1");
+    NetworkChange("eth0", "wlo1");
     HttpClient client2("155.230.34.228:8080", "wlo1");
 
-    
-    
+
     auto r2 = client2.request("GET", "/");
     handover_delay_end_time = client2.handover_delay_end_time;
     auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
@@ -127,7 +126,7 @@ void thread_function()
 
 int main()
 {
-   // cout << "------First Connection-----"<< endl;
+   // cout << "------First Connection-----"<< endl;A
     HttpClient client("155.230.34.228:8080", "eth0");
    // cout << "request1" << endl;
    

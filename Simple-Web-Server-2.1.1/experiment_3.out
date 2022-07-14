@@ -1,8 +1,11 @@
 Now ip is 172.20.10.6
-Client ip is 172.20.10.6:57414
+Client ip is 172.20.10.6:40582
 400 Bad Request
 [quic_toy_client] Network Change from eth0 to wlo1
+sudo route add -net 0.0.0.0 gw 192.168.34.1 dev wlo1 metric 101
+sudo route del -net 0.0.0.0 dev wlo1 metric 600
+sudo route add -net 0.0.0.0 gw 172.20.10.1 dev eth0 metric 600
 Now ip is 192.168.34.244
-Client ip is 192.168.34.244:41224
-handover delay : 96 miliseconds
-total delay : 90945 miliseconds
+Client ip is 192.168.34.244:46616
+handover delay : 275 miliseconds
+total delay : 2570 miliseconds
