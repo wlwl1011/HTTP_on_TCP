@@ -88,6 +88,9 @@
     "queue": "cpp",
     "semaphore": "cpp",
     "stack": "cpp",
-    "stop_token": "cpp"
-  }
+    "stop_token": "cpp",
+    "*.ipp": "cpp",
+    "filesystem": "cpp"
+  },
+  "C_Cpp.errorSquiggles": "Disabled"
 }

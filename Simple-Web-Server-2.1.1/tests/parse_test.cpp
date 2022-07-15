@@ -7,7 +7,7 @@
 // using namespace SimpleWeb;
 
 // class ServerTest : public ServerBase<HTTP> {
-// public:
+// public
 //     ServerTest() : ServerBase<HTTP>::ServerBase(8080) {}
             
 //     void accept() {}
